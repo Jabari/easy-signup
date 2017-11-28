@@ -1,42 +1,47 @@
 <template>
 	<div class="text-input--floating-label">
-		<input id="first-name" name="first-name" type="text" placeholder="First Name" required>
-  	<label for="name">First Name</label>
+		<input id="" v-bind:name="name" v-bind:type="type" v-bind:placeholder="placeholder" required>
+  	<label for="name" v-once>{{ placeholder }}</label>
 	</div>
 </template>
 <script>
 export default {
 	name: 'TextInputFloatingLabel',
-	props: ['fields']
+	props: [
+		'name',
+		'type',
+		'placeholder'
+	],
 }
 </script>
 <style lang="scss">
 /** $primary-color **/
 input, textarea {
-  width: 100%;
-  border: 2px solid #8CE9FF; 
+  background-color: #ddd;
+	border: 2px solid #1f292f; 
   border-radius: 4px;
-  background: none;
   color: #1f292f;
+  font-size: 1rem;
+  left: 0;
   margin: 1rem auto;
+  outline: 0;
+  padding: 0.7rem;
   position: relative;
   top: 0;
-  left: 0;
+  width: 100%;
   z-index: 1;
-  padding: 12px 12px 12px 12px;
-  outline: 0;
   &:valid {
     // Hides the label
     background: white; 
   }
   &:focus {
-    border-color: #f06d06;
-    padding: 4px 6px 20px 6px;
+  	background-color: white;
+    border-color: #8CE9FF;
+    
     + label {
-    	background: #f06d06;
-	    color: white;
+    	background: #8CE9FF; //#f06d06 orange
 	    font-size: 70%;
-	    padding: 1px 6px;
+	    padding: 1px 0.9rem;
 	    z-index: 2;
 	    text-transform: uppercase;
 	    top: 100%;
@@ -46,6 +51,7 @@ input, textarea {
 }
 label {
 	top: 0;
+	border-radius: 1px;
   bottom: 0;
   left: 0;
   width: 100%;
@@ -57,7 +63,7 @@ label {
     right 0.2s,
     left 0.2s;
   position: absolute;
-  color: #999;
+  color: white;
   padding: 7px 6px;
 }
 textarea {
