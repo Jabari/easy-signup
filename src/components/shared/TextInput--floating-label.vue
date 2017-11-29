@@ -1,14 +1,19 @@
 <template>
 	<div class="text-input--floating-label" :class="styleClass">
 		<input 
-			:name="kebabCased(name)" 
+			:name="kebabCased(name)"
+			:class="dirty === true ? ' dirty' : 'false'" 
 			:type="type" 
 			:placeholder="spacedCased(name)"
 			:pattern="pattern"
+			@focus="validate('focus')"
+      @blur="dirty = true"
+      @focusout="validate('focusout')"
+      @keydown.tab="validate('keydown tab')"
 			required>
   	<label for="name" v-once>{{ spacedCased(name) }}</label>
-  	<span class="text-input--error-message" v-show="!showError">
-  		Field is required
+  	<span class="text-input--error-message" v-if="name === 'password'">
+  		Please use at least 6 characters.
   	</span>
   	<!-- <span class="text-input--message" v-if="!$v.item.required">Field is required</span> -->
 	</div>
@@ -16,6 +21,11 @@
 <script>
 export default {
 	name: 'TextInputFloatingLabel',
+	data(){
+		return {
+			dirty: false,
+		}
+	},
 	directives: {
 		focus() {
 
@@ -31,6 +41,9 @@ export default {
     },
     showError() {
     	return this.$el.getElementsByTagName('input')[0].value == false;
+    },
+    validate(directive) {
+      console.log(directive)
     }
   },
   mounted() {
@@ -38,9 +51,8 @@ export default {
   },
 	props: [
 		'styleClass',
-		'dirty',
 		'error',
-		'patern',
+		'pattern',
 		'placeholder',
 		'name',
 		'type'
@@ -79,12 +91,15 @@ input, textarea {
   &[type="text"] {
   	text-transform: capitalize;
   }
-  &:invalid {
-  	//border-color: $error-color;
+  &:invalid.dirty:not(:focus) {
+  	border-color: $error-color;
   	//outline-color: ea520b; // #4D90FE
 		//outline-offset: -1px;
 		//outline-style: auto;
 		//outline-width: 3px;
+		~ .text-input--error-message {
+			display: block;
+		}
   }
   &:valid:not([type="submit"]) {
     // Hides the label
@@ -119,6 +134,7 @@ input, textarea {
   }
 	~ .text-input--error-message {
 		color: $error-color;
+		display: none;
 	}
 
 }
