@@ -1,18 +1,33 @@
 <template>
   <form id="signup" autocomplete="off">
     <text-input-floating-label v-for="(field, item) in fields"
-      :name="snakeCased(item)"
-      :placeholder="spacedCased(item)" 
-      :item="item"
+      @focus="console.log('focus')"
+      @blur="this.email = true"
+      @focusout=""
+      @keydown.tab="validate"
+      @keyup.tab="validate"
+      v-model="field.value"
+      :styleClass="field.class"
+      :pattern="field.pattern"
+      :name="item"
       :key="item"
-      :type="field">
-    </text-input-floating-label>  
+      :dirty="$v.fields.$each[item].$dirty"
+      :error="$v.fields.$each[item].$error"
+      :type="field.type">
+    </text-input-floating-label>
+    <input type="submit" />
+    <pre>{{ $v }}</pre>
   </form>
 </template>
 <script>
+//@blur="$v.text.$touch"
 import TextInputFloatingLabel from './shared/TextInput--floating-label'
 import Vue from 'vue'
-import { required, sameAs, minLength } from 'vuelidate/lib/validators'
+import Vuelidate from 'vuelidate'
+import { required, sameAs, dirty, minLength } from 'vuelidate/lib/validators'
+
+Vue.use(Vuelidate)
+const touchMap = new WeakMap()
 
 export default {
   name: 'SignUpForm',
@@ -21,38 +36,52 @@ export default {
   },
   data() {
     return {
+      email: '',
       fields: {
-        firstName: 'text',
-        lastName: 'text',
-        email: 'email',
-        password: 'password',
-        confirmPassword: 'password'
+        email: {type: 'email', value: ''},
+        firstName: {type: 'text', value: '', class:"half"},
+        lastName: {type: 'text', value: '', class:"half"},
+        password: {type: 'password', value: '', 
+          pattern: '(?=^.{8,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$'},
+        confirmPassword: {type: 'password', value: ''},
       },
     };
   },
   methods: {
-    spacedCased(text) {
-      text = text.replace( /([A-Z])/g, " $1" );
-      return text.charAt(0).toUpperCase() + text.slice(1)
+    delayTouch($v) {
+      console.log('input')
+      // $v.$reset()
+      // if (touchMap.has($v)) {
+      //   clearTimeout(touchMap.get($v))
+      // }
+      // touchMap.set($v, setTimeout($v.$touch, 1000))
     },
-    snakeCased(text) {
-      return text.replace( /([A-Z])/g, "-$1" );
-    },
+    validate() {
+      console.log("validate")
+    }
   },
   mounted() {
+    this.$el.elements[0].focus();
     //debugger;
   },
-  props: [
-    'name',
-    'type',
-    'placeholder'
-  ],
   validations: {
     fields: {
-      required,
+      $each: {
+        required,
+      },
+      email: {
+        value: {
+          required,
+        },
+      },
+      password: {
+        value: {
+          minLength: minLength(8)
+        }
+      },
       confirmPassword: {
         sameAsPassword: sameAs('password')
-      }
+      },
     }
   },
 }
@@ -77,10 +106,6 @@ form {
   max-width: 98%;
   width: 480px;
   margin: auto;
-
-  input {
-    margin: 1rem auto;
-  }
 
   > div {
     position: relative;

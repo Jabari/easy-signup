@@ -8,3 +8,9 @@ new Vue({
   el: '#app',
   render: h => h(App)
 })
+Vue.directive('c-focus', {
+	bind: function () {
+		debugger
+		this.$el.focus();
+	}
+});
