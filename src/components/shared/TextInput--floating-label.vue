@@ -2,23 +2,23 @@
 	<div class="text-input--floating-label" :class="styleClass">
 		<input 
 			v-if="type !== 'password'"
+			@blur="dirty = true"
+			:class="dirty === true ? ' dirty' : ''"
 			:name="kebabCased(name)"
-			:class="dirty === true ? ' dirty' : ''" 
-			:type="type" 
-			:placeholder="spacedCased(name)"
 			:pattern="pattern"
-      @blur="dirty = true"
-			required>
+			:placeholder="spacedCased(name)"
+			required
+			:type="type" >
 		<input 
 			v-else
+			@blur="dirty = true"
+			:class="dirty === true ? ' dirty' : ''"
+			@input="validatePasswordFields($event)"
 			:name="kebabCased(name)"
-			:class="dirty === true ? ' dirty' : ''" 
-			type="password" 
-			:placeholder="spacedCased(name)"
 			:pattern="pattern"
-      @blur="dirty = true"
-      @input="validate($event)"
-			required>
+			:placeholder="spacedCased(name)"
+			required
+			type="password" > 
   	<label for="name" v-once>{{ spacedCased(name) }}</label>
   	<span class="text-input--error-message" v-if="name === 'password'">
   		Please use at least 6 characters.
@@ -52,11 +52,10 @@ export default {
     kebabCased(text) {
       return text.replace( /([A-Z])/g, "-$1" ).toLowerCase();
     },
-    validate(e) { 	
-    	if ( passwordFields.length > 1 && passwordFields[1].value ) {
-    		
+    validatePasswordFields(e) { 	
+    	if ( passwordFields.length > 1 && passwordFields[1].value ) {   		
     		passwordFields[0].value === passwordFields[1].value ? 
-					(passwordFields[0].setCustomValidity(''), passwordFields[1].setCustomValidity('')) : 
+					passwordFields[1].setCustomValidity('') : 
 					passwordFields[1].setCustomValidity('invalid');
     	}
     	return;
@@ -66,18 +65,16 @@ export default {
     passwordFields = this.$el.parentElement.querySelectorAll('input[type="password"');
   },
 	props: [
-		'styleClass',
-		'error',
-		'pattern',
-		'placeholder',
 		'name',
+		'pattern',
+		'styleClass',
 		'type'
 	],
 }
 </script>
 <style lang="scss">
-$primary-color: #8CE9FF;
 $error-color: #f79483;
+$primary-color: #8CE9FF;
 $success-color: #5cb85c;
 .text-input--floating-label {
 	width: 100%;
