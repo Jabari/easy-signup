@@ -1,29 +1,42 @@
 <template>
 	<div class="text-input--floating-label" :class="styleClass">
 		<input 
+			v-if="type !== 'password'"
 			:name="kebabCased(name)"
-			:class="dirty === true ? ' dirty' : 'false'" 
+			:class="dirty === true ? ' dirty' : ''" 
 			:type="type" 
 			:placeholder="spacedCased(name)"
 			:pattern="pattern"
-			@focus="validate('focus')"
       @blur="dirty = true"
-      @focusout="validate('focusout')"
-      @keydown.tab="validate('keydown tab')"
+			required>
+		<input 
+			v-else
+			:name="kebabCased(name)"
+			:class="dirty === true ? ' dirty' : ''" 
+			type="password" 
+			:placeholder="spacedCased(name)"
+			:pattern="pattern"
+      @blur="dirty = true"
+      @input="validate($event)"
 			required>
   	<label for="name" v-once>{{ spacedCased(name) }}</label>
   	<span class="text-input--error-message" v-if="name === 'password'">
   		Please use at least 6 characters.
   	</span>
-  	<!-- <span class="text-input--message" v-if="!$v.item.required">Field is required</span> -->
+  	<span class="text-input--error-message" v-if="name === 'confirmPassword'">
+  		Please ensure this field exactly matches your password.
+  	</span>
 	</div>
 </template>
 <script>
+var passwordFields;
+
 export default {
 	name: 'TextInputFloatingLabel',
 	data(){
 		return {
 			dirty: false,
+			match: false,
 		}
 	},
 	directives: {
@@ -39,15 +52,18 @@ export default {
     kebabCased(text) {
       return text.replace( /([A-Z])/g, "-$1" ).toLowerCase();
     },
-    showError() {
-    	return this.$el.getElementsByTagName('input')[0].value == false;
-    },
-    validate(directive) {
-      console.log(directive)
+    validate(e) { 	
+    	if ( passwordFields.length > 1 && passwordFields[1].value ) {
+    		
+    		passwordFields[0].value === passwordFields[1].value ? 
+					(passwordFields[0].setCustomValidity(''), passwordFields[1].setCustomValidity('')) : 
+					passwordFields[1].setCustomValidity('invalid');
+    	}
+    	return;
     }
   },
   mounted() {
- 		//debugger
+    passwordFields = this.$el.parentElement.querySelectorAll('input[type="password"');
   },
 	props: [
 		'styleClass',
@@ -60,7 +76,7 @@ export default {
 }
 </script>
 <style lang="scss">
-/** $primary-color **/
+$primary-color: #8CE9FF;
 $error-color: #f79483;
 $success-color: #5cb85c;
 .text-input--floating-label {
@@ -93,10 +109,6 @@ input, textarea {
   }
   &:invalid.dirty:not(:focus) {
   	border-color: $error-color;
-  	//outline-color: ea520b; // #4D90FE
-		//outline-offset: -1px;
-		//outline-style: auto;
-		//outline-width: 3px;
 		~ .text-input--error-message {
 			display: block;
 		}
